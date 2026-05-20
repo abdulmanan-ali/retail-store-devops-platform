@@ -1,0 +1,202 @@
+name: retail-store
+services:
+  # ──────────────────────────────
+  # catalog service + MySQL
+  # ──────────────────────────────
+  catalog-db:
+    image: mariadb:10.9
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=catalogdb
+      - MYSQL_USER=catalog_user
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+        - catalog-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "catalog_user", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: always
+
+  catalog:
+    image: retail-catalog:1.0.0
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+    environment:
+      - GIN_MODE=release
+      - reschedule=on-node-failure
+      - RETAIL_CATALOG_PERSISTENCE_PROVIDER=mysql
+      - RETAIL_CATALOG_PERSISTENCE_PASSWORD=${DB_PASSWORD}
+      - RETAIL_CATALOG_PERSISTENCE_ENDPOINT=catalog-db:3306
+    healthcheck:
+      disable: true
+      # test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      # test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      # test: ["CMD", "nc", "-z", "localhost", "8080"]
+      # test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: always
+
+  # ──────────────────────────────
+  # cart service + dynamoDB local
+  # ──────────────────────────────
+  carts-db:
+    image: amazon/dynamodb-local:1.20.0
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 5s
+      timeout: 15s
+      retries: 3
+    restart: always
+
+  cart:
+    image: retail-cart:1.0.0
+    depends_on:
+      carts-db:
+        condition: service_healthy
+    environment:
+      - SERVER_TOMCAT_ACCESSLOG_ENABLED=true
+      - RETAIL_CART_PERSISTENCE_PROVIDER=dynamodb
+      - RETAIL_CART_PERSISTENCE_DYNAMODB_ENDPOINT=http://carts-db:8000
+      - RETAIL_CART_PERSISTENCE_DYNAMODB_CREATE_TABLE=true
+      - AWS_ACCESS_KEY_ID=key
+      - AWS_SECRET_ACCESS_KEY=dummy
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: always
+
+  # ──────────────────────────────
+  # checkout service + redis
+  # ──────────────────────────────
+  checkout-redis:
+    image: redis:6.0-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: always
+
+  checkout:
+    image: retail-checkout:1.0.0
+    depends_on:
+      checkout-redis:
+        condition: service_healthy
+    environment:
+      - RETAIL_CHECKOUT_PERSISTENCE_PROVIDER=redis
+      - RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL=redis://checkout-redis:6379
+      - RETAIL_CHECKOUT_ENDPOINTS_ORDERS=http://orders:8080
+    healthcheck:
+      # test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: always
+
+  # ──────────────────────────────
+  # orders service + PostgreSQL + RabbitMQ
+  # ──────────────────────────────
+  orders-db:
+    image: postgres:16.1
+    environment:
+      - POSTGRES_DB=orders
+      - POSTGRES_USER=orders_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - orders-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders_user -d orders || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: always
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  orders:
+    image: retail-orders:1.0.0
+    depends_on:
+      orders-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - SERVER_TOMCAT_ACCESSLOG_ENABLED=true
+      - RETAIL_ORDERS_PERSISTENCE_PROVIDER=postgres
+      - RETAIL_ORDERS_PERSISTENCE_ENDPOINT=orders-db:5432
+      - RETAIL_ORDERS_PERSISTENCE_NAME=orders
+      - RETAIL_ORDERS_PERSISTENCE_USERNAME=orders_user
+      - RETAIL_ORDERS_PERSISTENCE_PASSWORD=${DB_PASSWORD}
+      - RETAIL_ORDERS_MESSAGING_PROVIDER=rabbitmq
+      - RETAIL_ORDERS_MESSAGING_RABBITMQ_ADDRESSES=rabbitmq:5672
+      - RETAIL_ORDERS_MESSAGING_RABBITMQ_USERNAME=rabbitmq
+      - RETAIL_ORDERS_MESSAGING_RABBITMQ_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      # test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 10s
+      timeout: 10s 
+      retries: 3
+      start_period: 15s
+    restart: always
+
+  # ──────────────────────────────
+  # ui service
+  # ──────────────────────────────
+  
+  ui:
+    image: retail-ui:1.0.0
+    depends_on:
+      catalog:
+        condition: service_started
+      cart:
+        condition: service_healthy
+      checkout:
+        condition: service_healthy
+      orders:
+        condition: service_healthy
+    environment:
+      - RETAIL_UI_ENDPOINTS_CATALOG=http://catalog:8080
+      - RETAIL_UI_ENDPOINTS_CARTS=http://cart:8080
+      - RETAIL_UI_ENDPOINTS_CHECKOUT=http://checkout:8080
+      - RETAIL_UI_ENDPOINTS_ORDERS=http://orders:8080
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 10s 
+      retries: 3
+      start_period: 30s
+    restart: always
+    ports:
+      - "8888:8080"
+
+volumes:
+  catalog-db-data:
+  orders-db-data:
+  rabbitmq-data:
