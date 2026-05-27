@@ -1,0 +1,31 @@
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-db-deployment
+  namespace: retail-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-db
+  template:
+    metadata:
+      labels:
+        app: cart-db
+    spec:
+      containers:
+      - name: dynamodb
+        image: amazon/dynamodb-local:1.20.0
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          exec:
+            command: 
+              - sh
+              - -c
+              - exit 0
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 15
+          failureThreshold: 3

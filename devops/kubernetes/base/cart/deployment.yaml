@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-deployment
+  namespace: retail-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart
+  template:
+    metadata:
+      labels:
+        app: cart
+    spec:
+      containers:
+      - name: cart
+        image: retail-cart:1.0.0
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: cart-config
+        - secretRef:
+            name: cart-secret
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          exec:
+            command: 
+              - sh
+              - -c
+              - exit 0
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 15
+          failureThreshold: 3
