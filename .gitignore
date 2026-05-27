@@ -49,3 +49,5 @@ screenshots
 *.tfstate.backup
 .terraform/
 docker-compose.override.yml
+*secret.yaml
+*secret-db.yaml
