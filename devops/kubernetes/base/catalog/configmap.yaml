@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalog-config
+  namespace: retail-store
+data:
+  GIN_MODE: "release"
+  RETAIL_CATALOG_PERSISTENCE_PROVIDER: "mysql"
+  RETAIL_CATALOG_PERSISTENCE_ENDPOINT: "catalog-db:3306"

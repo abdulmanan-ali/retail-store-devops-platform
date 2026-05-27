@@ -1,0 +1,79 @@
+# pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: catalog-db-pvc
+  namespace: retail-store
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-db-deployment
+  namespace: retail-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-db
+  template:
+    metadata:
+      labels:
+        app: catalog-db
+    spec:
+      containers:
+      - name: mysql
+        image: mariadb:10.9
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: catalog-db-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_DATABASE
+          value: catalogdb
+        - name: MYSQL_USER
+          value: catalog_user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: catalog-db-secret
+              key: MYSQL_PASSWORD
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: catalog-db-storage
+          mountPath: /var/lib/mysql
+        readinessProbe:
+          exec:
+            command: 
+              - sh
+              - -c
+              - mysqladmin ping -h localhost -u root -p"$MYSQL_ROOT_PASSWORD"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: catalog-db-storage
+        persistentVolumeClaim:
+          claimName: catalog-db-pvc
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-db
+  namespace: retail-store
+spec:
+  selector:
+    app: catalog-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
