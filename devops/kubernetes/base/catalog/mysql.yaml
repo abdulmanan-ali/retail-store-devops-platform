@@ -30,6 +30,13 @@ spec:
       containers:
       - name: mysql
         image: mariadb:10.9
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits: 
+            cpu: "1"
+            memory: "2Gi"
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:

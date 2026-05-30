@@ -17,6 +17,13 @@ spec:
       - name: cart
         image: retail-cart:1.0.0
         imagePullPolicy: Never
+        resources:
+          requests:
+            cpu: "300m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
         envFrom:
         - configMapRef:
             name: cart-config

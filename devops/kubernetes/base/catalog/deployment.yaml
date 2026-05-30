@@ -17,6 +17,13 @@ spec:
       - name: catalog
         image: retail-catalog:1.0.0
         imagePullPolicy: Never
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "256Mi"
         envFrom:
         - configMapRef:
             name: catalog-config
