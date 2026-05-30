@@ -1,0 +1,40 @@
+#deployment checkout
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-deployment
+  namespace: retail-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkout
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      containers:
+      - name: checkout
+        image: retail-checkout:1.0.0
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: checkout-config
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+          
