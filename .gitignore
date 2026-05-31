@@ -50,4 +50,5 @@ screenshots
 .terraform/
 docker-compose.override.yml
 *secret.yaml
+*secrets.yaml
 *secret-db.yaml
