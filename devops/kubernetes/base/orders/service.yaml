@@ -1,0 +1,14 @@
+# orders service
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-service
+  namespace: retail-store
+spec:
+  selector:
+    app: orders
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP

@@ -1,0 +1,42 @@
+# orders service Deployment
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: orders-deployment
+  namespace: retail-store 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders
+  template:
+    metadata:
+      labels:
+        app: orders
+    spec:
+      containers:
+      - name: orders
+        image: retail-orders:1.0.0
+        imagePullPolicy: Never
+        resources:
+          requests:
+            cpu: "300m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+        envFrom:
+        - configMapRef:
+            name: orders-config
+        - secretRef:
+            name: orders-secret
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
