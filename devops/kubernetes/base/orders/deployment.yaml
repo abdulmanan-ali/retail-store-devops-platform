@@ -34,9 +34,17 @@ spec:
         - containerPort: 8080
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /actuator/health || exit 1
             port: 8080
           initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health || exit 1
+            port: 8080
+          initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 10
           failureThreshold: 3
