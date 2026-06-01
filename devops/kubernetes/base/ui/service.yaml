@@ -1,0 +1,15 @@
+# service ui
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-service
+  namespace: retail-store
+spec:
+  selector:
+    app: ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  type: NodePort

@@ -1,0 +1,11 @@
+# configmap ui
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ui-config
+  namespace: retail-store
+data:
+  RETAIL_UI_ENDPOINTS_CATALOG: "http://catalog-service:8080"
+  RETAIL_UI_ENDPOINTS_CARTS: "http://cart-service:8080"
+  RETAIL_UI_ENDPOINTS_CHECKOUT: "http://checkout-service:8080"
+  RETAIL_UI_ENDPOINTS_ORDERS: "http://orders-service:8080"
