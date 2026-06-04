@@ -2,7 +2,7 @@ global:
   imagePullPolicy: Never
   namespace: retail-store
 
-dbPassword: "retail1234"
+dbPassword: "change_me_to_secure_password"
 
 services:
   catalog:
