@@ -1,0 +1,101 @@
+{{- range $name, $db := .Values.databases }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ $name }}
+spec:
+  replicas: {{ $db.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: "{{ $db.image }}:{{ $db.tag }}"
+          imagePullPolicy: IfNotPresent
+          {{- if $db.env }}
+          env:
+            {{- range $key, $value := $db.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- if eq $name "catalog-db" }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ $.Values.dbPassword | quote }}
+            - name: MYSQL_PASSWORD
+              value: {{ $.Values.dbPassword | quote }}
+            {{- end }}
+            {{- if eq $name "orders-db" }}
+            - name: POSTGRES_PASSWORD
+              value: {{ $.Values.dbPassword | quote }}
+            {{- end }}
+            {{- if eq $name "rabbitmq" }}
+            - name: RABBITMQ_DEFAULT_PASS
+              value: {{ $.Values.dbPassword | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if $db.port }}
+          ports:
+            - containerPort: {{ $db.port }}
+          {{- else if $db.ports }}
+          ports:
+            {{- range $portName, $portNum := $db.ports }}
+            - containerPort: {{ $portNum }}
+              name: {{ $portName }}
+            {{- end }}
+          {{- end }}
+          {{- if $db.storage }}
+          volumeMounts:
+            - name: {{ $name }}-storage
+              mountPath: /var/lib/{{ $name }}
+      volumes:
+        - name: {{ $name }}-storage
+          persistentVolumeClaim:
+            claimName: {{ $name }}-pvc
+          {{- end }}
+---
+# pvc
+{{- if $db.storage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-pvc
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $db.storage }}
+{{- end }} 
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  selector:
+    app: {{ $name }}
+  ports:
+    {{- if $db.port }}
+    - port: {{ $db.port }}
+      targetPort: {{ $db.port }}
+    {{- else if $db.ports }}
+    {{- range $portName, $portNum := $db.ports }}
+    - port: {{ $portNum }}
+      targetPort: {{ $portNum }}
+      name: {{ $portName }}
+    {{- end }}
+    {{- end }}
+  type: ClusterIP
+{{- end }}

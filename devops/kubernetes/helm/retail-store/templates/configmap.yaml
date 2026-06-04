@@ -1,0 +1,13 @@
+# helm configmap
+{{- range $name, $service := .Values.services }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-config
+  namespace: {{ $.Values.global.namespace }}
+data:
+{{- range $key, $value := $service.env }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
