@@ -55,7 +55,14 @@ spec:
           {{- if $db.storage }}
           volumeMounts:
             - name: {{ $name }}-storage
-              mountPath: /var/lib/{{ $name }}
+              {{- if eq $name "catalog-db" }}
+              mountPath: /var/lib/mysql
+              {{- else if eq $name "orders-db" }}
+              mountPath: /var/lib/postgresql/data
+              {{- else if eq $name "rabbitmq" }}
+              mountPath: /var/lib/rabbitmq
+              {{- else }}
+              {{- end }}
       volumes:
         - name: {{ $name }}-storage
           persistentVolumeClaim:
