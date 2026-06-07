@@ -39,7 +39,6 @@ jobs:
           docker build \
           -f devops/docker/${{ matrix.service }}/Dockerfile \
           -t ${{ env.ECR_REGISTRY }}/retail-store-${{ matrix.service }}:${{ github.sha }} \
-          -t ${{ env.ECR_REGISTRY }}/retail-store-${{ matrix.service }}:latest \
           .
 
       - name: Scan image with Trivy
@@ -54,4 +53,3 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           docker push ${{ env.ECR_REGISTRY }}/retail-store-${{ matrix.service }}:${{ github.sha }}
-          docker push ${{ env.ECR_REGISTRY }}/retail-store-${{ matrix.service }}:latest
