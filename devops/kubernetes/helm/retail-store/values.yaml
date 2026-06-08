@@ -9,7 +9,7 @@ services:
     image: retail-catalog
     tag: "1.0.0"
     port: 8080
-    replicas: 1
+    replicas: 2
     env:
       GIN_MODE: "release"
       RETAIL_CATALOG_PERSISTENCE_PROVIDER: "mysql"
