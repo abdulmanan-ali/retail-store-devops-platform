@@ -58,7 +58,7 @@ spec:
               {{- if eq $name "catalog-db" }}
               mountPath: /var/lib/mysql
               {{- else if eq $name "orders-db" }}
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
               {{- else if eq $name "rabbitmq" }}
               mountPath: /var/lib/rabbitmq
               {{- else }}
