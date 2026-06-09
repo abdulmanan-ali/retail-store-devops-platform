@@ -1,5 +1,5 @@
 global:
-  imagePullPolicy: Never
+  imagePullPolicy: IfNotPresent
   namespace: retail-store
 
 dbPassword: "change_me_to_secure_password"
