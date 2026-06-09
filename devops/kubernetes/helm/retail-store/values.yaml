@@ -7,7 +7,7 @@ dbPassword: "change_me_to_secure_password"
 services:
   catalog:
     image: retail-catalog
-    tag: "1.0.0"
+    tag: "bb3e72e0b4ece877fce244b4c22e9ecf71e6d586"
     port: 8080
     replicas: 1
     env:
@@ -17,7 +17,7 @@ services:
 
   cart:
     image: retail-cart
-    tag: "1.0.0"
+    tag: "bb3e72e0b4ece877fce244b4c22e9ecf71e6d586"
     port: 8080
     replicas: 1
     env:
@@ -29,7 +29,7 @@ services:
 
   checkout:
     image: retail-checkout
-    tag: "1.0.0"
+    tag: "bb3e72e0b4ece877fce244b4c22e9ecf71e6d586"
     port: 8080
     replicas: 1
     env:
@@ -39,7 +39,7 @@ services:
 
   orders:
     image: retail-orders
-    tag: "1.0.0"
+    tag: "bb3e72e0b4ece877fce244b4c22e9ecf71e6d586"
     port: 8080
     replicas: 1
     env:
@@ -53,7 +53,7 @@ services:
 
   ui:
     image: retail-ui
-    tag: "1.0.0"
+    tag: "bb3e72e0b4ece877fce244b4c22e9ecf71e6d586"
     port: 8080
     replicas: 1
     env:
