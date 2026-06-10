@@ -2,11 +2,11 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-env: 
+env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 866849310135.dkr.ecr.us-east-1.amazonaws.com
 
@@ -45,7 +45,7 @@ jobs:
         with:
           image-ref: ${{ env.ECR_REGISTRY }}/retail-store-${{ matrix.service }}:${{ github.sha }}
           format: table
-          exit-code: '1'
+          exit-code: "1"
           severity: CRITICAL
           # ignore-unfixed: true
 
@@ -66,12 +66,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Update all image name & tags
+      - name: Update all images + tags
         run: |
+          ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+
           for service in catalog orders checkout cart ui; do
-            sed -i "/^  ${service}:$/,/tag:/ s|image: .*|image: ${env.ECR_REGISTRY}/retail-store-${service}|" devops/kubernetes/helm/retail-store/values.yaml
-            sed -i "/^  ${service}:$/,/tag:/ s|tag: \".*\"|tag: \"${{ github.sha }}\"|" devops/kubernetes/helm/retail-store/values.yaml
-          done
+           sed -i "/^  ${service}:$/,/tag:/ s|image: .*|image: ${env.ECR_REGISTRY}/retail-store-${service}|" devops/kubernetes/helm/retail-store/values.yaml
+             
+           sed -i "/^  ${service}:$/,/tag:/ s|tag: \".*\"|tag: \"${{ github.sha }}\"|" devops/kubernetes/helm/retail-store/values.yaml
+           done
 
       - name: Commit and push
         run: |
