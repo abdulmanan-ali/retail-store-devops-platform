@@ -71,7 +71,7 @@ jobs:
           ECR_REGISTRY=${{ env.ECR_REGISTRY }}
 
           for service in catalog orders checkout cart ui; do
-           sed -i "/^  ${service}:$/,/tag:/ s|image: .*|image: ${env.ECR_REGISTRY}/retail-store-${service}|" devops/kubernetes/helm/retail-store/values.yaml
+           sed -i "/^  ${service}:$/,/tag:/ s|image: .*|image: ${ECR_REGISTRY}/retail-store-${service}|" devops/kubernetes/helm/retail-store/values.yaml
              
            sed -i "/^  ${service}:$/,/tag:/ s|tag: \".*\"|tag: \"${{ github.sha }}\"|" devops/kubernetes/helm/retail-store/values.yaml
            done
