@@ -6,8 +6,8 @@ dbPassword: "change_me_to_secure_password"
 
 services:
   catalog:
-    image: retail-catalog
-    tag: "dcb7c539bf81b2dbb4b39be6f28dc7dd72c07563"
+    image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-catalog
+    tag: "de6c038870490648301b7858555cdae8abbc24f6"
     port: 8080
     replicas: 1
     env:
@@ -16,8 +16,8 @@ services:
       RETAIL_CATALOG_PERSISTENCE_ENDPOINT: "catalog-db:3306"
 
   cart:
-    image: retail-cart
-    tag: "dcb7c539bf81b2dbb4b39be6f28dc7dd72c07563"
+    image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-cart
+    tag: "de6c038870490648301b7858555cdae8abbc24f6"
     port: 8080
     replicas: 1
     env:
@@ -28,8 +28,8 @@ services:
       AWS_SECRET_ACCESS_KEY: "dummy"
 
   checkout:
-    image: retail-checkout
-    tag: "dcb7c539bf81b2dbb4b39be6f28dc7dd72c07563"
+    image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-checkout
+    tag: "de6c038870490648301b7858555cdae8abbc24f6"
     port: 8080
     replicas: 1
     env:
@@ -38,8 +38,8 @@ services:
       RETAIL_CHECKOUT_ENDPOINTS_ORDERS: "http://orders:8080"
 
   orders:
-    image: retail-orders
-    tag: "dcb7c539bf81b2dbb4b39be6f28dc7dd72c07563"
+    image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-orders
+    tag: "de6c038870490648301b7858555cdae8abbc24f6"
     port: 8080
     replicas: 1
     env:
@@ -52,8 +52,8 @@ services:
       RETAIL_ORDERS_MESSAGING_RABBITMQ_USERNAME: "rabbitmq"
 
   ui:
-    image: retail-ui
-    tag: "dcb7c539bf81b2dbb4b39be6f28dc7dd72c07563"
+    image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-ui
+    tag: "de6c038870490648301b7858555cdae8abbc24f6"
     port: 8080
     replicas: 1
     env:
