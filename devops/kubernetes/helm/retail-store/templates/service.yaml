@@ -8,6 +8,7 @@ metadata:
 spec:
   selector:
     app: {{ $name }}
+    app.kubernetes.io/managed-by: Helm
   ports:
   - name: http
     port: {{ $service.port }}
