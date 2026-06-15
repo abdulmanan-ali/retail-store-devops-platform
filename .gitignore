@@ -53,3 +53,4 @@ docker-compose.override.yml
 *secrets.yaml
 *secret-db.yaml
 notes.txt
+ecr-credentials-refresher.yaml
