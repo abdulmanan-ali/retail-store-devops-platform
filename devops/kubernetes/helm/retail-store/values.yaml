@@ -7,7 +7,7 @@ dbPassword: "change_me_to_secure_password"
 services:
   catalog:
     image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-catalog
-    tag: "de6c038870490648301b7858555cdae8abbc24f6"
+    tag: "eccffa5bb178b6f1a0ba4f328142fb82dafb86bd"
     port: 8080
     replicas: 1
     env:
@@ -17,7 +17,7 @@ services:
 
   cart:
     image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-cart
-    tag: "de6c038870490648301b7858555cdae8abbc24f6"
+    tag: "eccffa5bb178b6f1a0ba4f328142fb82dafb86bd"
     port: 8080
     replicas: 1
     env:
@@ -29,7 +29,7 @@ services:
 
   checkout:
     image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-checkout
-    tag: "de6c038870490648301b7858555cdae8abbc24f6"
+    tag: "eccffa5bb178b6f1a0ba4f328142fb82dafb86bd"
     port: 8080
     replicas: 1
     env:
@@ -39,7 +39,7 @@ services:
 
   orders:
     image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-orders
-    tag: "de6c038870490648301b7858555cdae8abbc24f6"
+    tag: "eccffa5bb178b6f1a0ba4f328142fb82dafb86bd"
     port: 8080
     replicas: 1
     env:
@@ -53,7 +53,7 @@ services:
 
   ui:
     image: 866849310135.dkr.ecr.us-east-1.amazonaws.com/retail-store-ui
-    tag: "de6c038870490648301b7858555cdae8abbc24f6"
+    tag: "eccffa5bb178b6f1a0ba4f328142fb82dafb86bd"
     port: 8080
     replicas: 1
     env:
