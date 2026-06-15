@@ -5,13 +5,14 @@ kind: Service
 metadata:
   name: {{ $name }}
   namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ $name }}
 spec:
   selector:
     app: {{ $name }}
-    app.kubernetes.io/managed-by: Helm
   ports:
-  - name: http
-    port: {{ $service.port }}
-    targetPort: {{ $service.port }}
+    - name: http
+      port: {{ $service.port }}
+      targetPort: {{ $service.port }}
   type: ClusterIP
 {{- end }}
