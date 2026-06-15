@@ -1,0 +1,62 @@
+#service monitors.yaml for all services
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: retail-store-java-services
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - retail-store
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - orders
+          - cart
+          - ui
+  endpoints:
+  - port: http
+    path: /actuator/prometheus
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: retail-store-catalog
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - retail-store
+  selector:
+    matchLabels:
+      app: catalog
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: retail-store-checkout
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - retail-store
+  selector:
+    matchLabels:
+      app: checkout
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
