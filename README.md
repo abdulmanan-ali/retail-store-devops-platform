@@ -1,180 +1,180 @@
-![Banner](./docs/images/banner.png)
+# Retail Store DevOps Platform
 
-<div align="center">
-  <div align="center">
+Production-grade DevOps infrastructure built on top of the [AWS Retail Store Sample App](https://github.com/aws-containers/retail-store-sample-app) — a real 5-microservice application (Go, Java, Node.js) used as the foundation to design, build, and operate a full cloud-native delivery pipeline from scratch.
 
-[![Stars](https://img.shields.io/github/stars/aws-containers/retail-store-sample-app)](Stars)
-![GitHub License](https://img.shields.io/github/license/aws-containers/retail-store-sample-app?color=green)
-![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Faws-containers%2Fretail-store-sample-app%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json&query=%24%5B%22.%22%5D&label=release)
-![GitHub Release Date](https://img.shields.io/github/release-date/aws-containers/retail-store-sample-app)
+**This repository is not the sample app itself.** It is the DevOps platform — Docker, Terraform, Kubernetes, Helm, CI/CD, GitOps, and Observability — engineered around it.
 
-  </div>
+Built by [Abdul Manan Ali](https://github.com/abdulmanan-ali) — Lahore, Pakistan.
 
-  <strong>
-  <h2>AWS Containers Retail Sample</h2>
-  </strong>
-</div>
+---
 
-This is a sample application designed to illustrate various concepts related to containers on AWS. It presents a sample retail store application including a product catalog, shopping cart and checkout.
+## What this project demonstrates
 
-It provides:
+| Area | What was built |
+|---|---|
+| **Containerization** | Custom multi-stage Dockerfiles for all 5 services (Go, Java/Spring Boot, Node.js/NestJS) — smaller, more secure images than the original |
+| **Infrastructure as Code** | AWS VPC + ECR provisioned with official Terraform modules, remote state in S3, state locking via DynamoDB |
+| **Container Orchestration** | Full stack running on Kubernetes (Kind locally, AWS EKS for production validation), 10 pods across 5 services + 5 datastores |
+| **Package Management** | Custom Helm chart templating all 5 services and databases with a single set of templates and a shared `values.yaml` |
+| **CI/CD** | GitHub Actions pipeline — parallel matrix builds, Trivy vulnerability scanning, immutable image tags, automated Helm value updates |
+| **GitOps** | ArgoCD continuously syncing the cluster to Git — zero manual `kubectl apply` in the deployment flow |
+| **Observability** | Prometheus + Grafana stack with custom dashboards covering all 5 services, JVM/Go/Node.js runtime metrics, and infrastructure health |
+| **Security** | 7 real CVEs identified and fixed via the CI pipeline (Thymeleaf SSTI, Tomcat auth bypass, Go TLS bypass, vulnerable npm dependency) |
 
-- A demo store-front application with themes, pages to show container and application topology information, generative AI chat bot and utility functions for experimentation and demos.
-- An optional distributed component architecture using various languages and frameworks
-- A variety of different persistence backends for the various components like MariaDB (or MySQL), DynamoDB and Redis
-- The ability to run in different container orchestration technologies like Docker Compose, Kubernetes etc.
-- Pre-built container images for both x86-64 and ARM64 CPU architectures
-- All components instrumented for Prometheus metrics and OpenTelemetry OTLP tracing
-- Support for Istio on Kubernetes
-- Load generator which exercises all of the infrastructure
+---
 
-See the [features documentation](./docs/features.md) for more information.
+## Application architecture
 
-**This project is intended for educational purposes only and not for production use**
+The underlying sample app intentionally uses multiple languages and persistence backends to mirror a real polyglot microservices environment:
 
-![Screenshot](/docs/images/screenshot.png)
+| Component | Language | Persistence | Description |
+|---|---|---|---|
+| [UI](./src/ui/) | Java (Spring Boot) | — | Storefront, aggregates the other services |
+| [Catalog](./src/catalog/) | Go | MySQL/MariaDB | Product catalog API |
+| [Cart](./src/cart/) | Java (Spring Boot) | DynamoDB | Shopping cart API |
+| [Orders](./src/orders/) | Java (Spring Boot) | PostgreSQL + RabbitMQ | Order management API |
+| [Checkout](./src/checkout/) | Node.js (NestJS) | Redis | Orchestrates the checkout flow |
 
-## Application Architecture
+---
 
-The application has been deliberately over-engineered to generate multiple de-coupled components. These components generally have different infrastructure dependencies, and may support multiple "backends" (example: Carts service supports MongoDB or DynamoDB).
-
-![Architecture](/docs/images/architecture.png)
-
-| Component                  | Language | Container Image                                                             | Helm Chart                                                                        | Description                             |
-| -------------------------- | -------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------- |
-| [UI](./src/ui/)            | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-ui)       | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-ui-chart)       | Store user interface                    |
-| [Catalog](./src/catalog/)  | Go       | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-catalog)  | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-catalog-chart)  | Product catalog API                     |
-| [Cart](./src/cart/)        | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-cart)     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-cart-chart)     | User shopping carts API                 |
-| [Orders](./src/orders)     | Java     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-orders)   | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-orders-chart)   | User orders API                         |
-| [Checkout](./src/checkout) | Node     | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-checkout) | [Link](https://gallery.ecr.aws/aws-containers/retail-store-sample-checkout-chart) | API to orchestrate the checkout process |
-
-## Quickstart
-
-The following sections provide quickstart instructions for various platforms.
-
-### Docker
-
-This deployment method will run the application as a single container on your local machine using `docker`.
-
-Pre-requisites:
-
-- Docker installed locally
-
-Run the container:
+## Platform architecture
 
 ```
-docker run -it --rm -p 8888:8080 public.ecr.aws/aws-containers/retail-store-sample-ui:1.0.0
+                         ┌─────────────────┐
+                         │   GitHub Repo    │  ← single source of truth
+                         └────────┬─────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    ▼                           ▼
+         ┌──────────────────┐         ┌──────────────────┐
+         │  GitHub Actions   │         │     ArgoCD        │
+         │  - Build (matrix) │         │  - Watches Git     │
+         │  - Trivy scan     │         │  - Auto-syncs      │
+         │  - Push to ECR    │         │    cluster state   │
+         │  - Update Helm    │         │  - selfHeal: true  │
+         └─────────┬─────────┘         └─────────┬──────────┘
+                   │                              │
+                   ▼                              ▼
+            ┌─────────────┐              ┌──────────────────┐
+            │   AWS ECR    │◄─────────────│   Kubernetes      │
+            │ (5 repos,    │   pulls      │   Cluster          │
+            │  SHA tags)   │              │  - 5 services       │
+            └─────────────┘              │  - 5 databases       │
+                                          │  - Prometheus/Grafana│
+                                          └──────────────────────┘
 ```
 
-Open the frontend in a browser window:
+---
+
+## Tech stack
+
+- **Containers:** Docker (multi-stage builds)
+- **IaC:** Terraform (VPC, ECR, official AWS modules)
+- **Orchestration:** Kubernetes (Kind for local dev, AWS EKS for production)
+- **Packaging:** Helm 3
+- **CI:** GitHub Actions + Trivy
+- **CD / GitOps:** ArgoCD
+- **Observability:** Prometheus, Grafana, kube-state-metrics
+- **Cloud:** AWS (ECR, VPC, S3, DynamoDB, EKS)
+
+---
+
+## Repository structure
 
 ```
-http://localhost:8888
+.
+├── src/                          # Microservice source code (Go, Java, Node.js)
+├── devops/
+│   ├── docker/                   # Custom multi-stage Dockerfiles per service
+│   ├── terraform/                # VPC, ECR, remote state config
+│   ├── kubernetes/
+│   │   ├── base/                 # Raw manifests, ServiceMonitors
+│   │   ├── helm/retail-store/    # Helm chart (templates + values.yaml)
+│   │   └── argocd/               # ArgoCD Application manifest
+│   └── scripts/                  # Load testing, automation scripts
+├── .github/workflows/            # CI pipeline (ci.yml)
+└── docker-compose.yaml           # Local multi-service stack (reference)
 ```
 
-To stop the container in `docker` use Ctrl+C.
+---
 
-### Docker Compose
+## Running it locally
 
-This deployment method will run the application on your local machine using `docker-compose`.
+### Docker Compose (fastest way to see it working)
 
-Pre-requisites:
-
-- Docker installed locally
-
-Download the latest Docker Compose file and use `docker compose` to run the application containers:
-
-```
-wget https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/docker-compose.yaml
-
-DB_PASSWORD='<some password>' docker compose --file docker-compose.yaml up
+```bash
+DB_PASSWORD='your_password' docker compose -f docker-compose.yaml up
 ```
 
-Open the frontend in a browser window:
+Open `http://localhost:8888`.
 
-```
-http://localhost:8888
-```
+### Kubernetes (Kind)
 
-To stop the containers in `docker compose` use Ctrl+C. To delete all the containers and related resources run:
-
-```
-docker compose -f docker-compose.yaml down
+```bash
+kind create cluster --name retail-store --config kind-config.yaml
+helm install retail-store devops/kubernetes/helm/retail-store -n retail-store --create-namespace
+kubectl port-forward svc/ui -n retail-store 8080:8080
 ```
 
-### Kubernetes
+Open `http://localhost:8080`.
 
-This deployment method will run the application in an existing Kubernetes cluster.
+### Monitoring
 
-Pre-requisites:
-
-- Kubernetes cluster
-- `kubectl` installed locally
-
-Use `kubectl` to run the application:
-
-```
-kubectl apply -f https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/kubernetes.yaml
-kubectl wait --for=condition=available deployments --all
+```bash
+helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
 ```
 
-Get the URL for the frontend load balancer like so:
+Open `http://localhost:3000`.
 
-```
-kubectl get svc ui
-```
+---
 
-To remove the application use `kubectl` again:
+## CI/CD pipeline
 
-```
-kubectl delete -f https://github.com/aws-containers/retail-store-sample-app/releases/latest/download/kubernetes.yaml
-```
+On every push to `main`:
 
-### Terraform
+1. All 5 services build in parallel (matrix strategy)
+2. Trivy scans each image and **blocks the pipeline on CRITICAL vulnerabilities**
+3. Images are pushed to ECR with immutable, commit-SHA tags
+4. A sequential job updates the Helm chart's `values.yaml` with new tags
+5. ArgoCD detects the Git change and syncs the cluster automatically
 
-The following options are available to deploy the application using Terraform:
+No image is ever pushed with an unscanned or vulnerable build. No deployment happens without a corresponding Git commit.
 
-| Name                                             | Description                                                                                                     |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| [Amazon EKS](./terraform/eks/default/)           | Deploys the application to Amazon EKS using other AWS services for dependencies, such as RDS, DynamoDB etc.     |
-| [Amazon EKS (Minimal)](./terraform/eks/minimal/) | Deploys the application to Amazon EKS using in-cluster dependencies instead of RDS, DynamoDB etc.               |
-| [Amazon ECS](./terraform/ecs/default/)           | Deploys the application to Amazon ECS using other AWS services for dependencies, such as RDS, DynamoDB etc.     |
-| [AWS App Runner](./terraform/apprunner/)         | Deploys the application to AWS App Runner using other AWS services for dependencies, such as RDS, DynamoDB etc. |
+---
 
-## Security
+## Known limitations (local Kind environment)
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+- Kind cannot natively pull from private ECR (no IAM role support) — images are loaded manually via `kind load docker-image` for local testing. This is a Kind-specific limitation, not a pipeline issue.
+- Full end-to-end GitOps validation (ECR → ArgoCD → cluster, with zero manual steps) is performed on AWS EKS where IAM roles for service accounts (IRSA) handle registry auth natively.
+
+---
+
+## Roadmap
+
+- [x] Custom Docker images for all services
+- [x] Terraform-managed AWS infrastructure (VPC, ECR)
+- [x] Kubernetes manifests + Helm chart
+- [x] CI/CD with Trivy security scanning
+- [x] ArgoCD GitOps
+- [x] Prometheus + Grafana observability
+- [ ] Horizontal Pod Autoscaling (HPA) under simulated load
+- [ ] Nginx reverse proxy / ingress
+- [ ] AWS Secrets Manager integration
+- [ ] Uptime Kuma status page
+- [ ] Full deployment validation on AWS EKS
+
+---
+
+## Author
+
+**Abdul Manan Ali**
+Lahore, Pakistan — transitioning into DevOps
+[GitHub](https://github.com/abdulmanan-ali)
+
+---
 
 ## License
 
-This project is licensed under the MIT-0 License.
-
-This package depends on and may incorporate or retrieve a number of third-party
-software packages (such as open source packages) at install-time or build-time
-or run-time ("External Dependencies"). The External Dependencies are subject to
-license terms that you must accept in order to use this package. If you do not
-accept all of the applicable license terms, you should not use this package. We
-recommend that you consult your company’s open source approval policy before
-proceeding.
-
-Provided below is a list of External Dependencies and the applicable license
-identification as indicated by the documentation associated with the External
-Dependencies as of Amazon's most recent review.
-
-THIS INFORMATION IS PROVIDED FOR CONVENIENCE ONLY. AMAZON DOES NOT PROMISE THAT
-THE LIST OR THE APPLICABLE TERMS AND CONDITIONS ARE COMPLETE, ACCURATE, OR
-UP-TO-DATE, AND AMAZON WILL HAVE NO LIABILITY FOR ANY INACCURACIES. YOU SHOULD
-CONSULT THE DOWNLOAD SITES FOR THE EXTERNAL DEPENDENCIES FOR THE MOST COMPLETE
-AND UP-TO-DATE LICENSING INFORMATION.
-
-YOUR USE OF THE EXTERNAL DEPENDENCIES IS AT YOUR SOLE RISK. IN NO EVENT WILL
-AMAZON BE LIABLE FOR ANY DAMAGES, INCLUDING WITHOUT LIMITATION ANY DIRECT,
-INDIRECT, CONSEQUENTIAL, SPECIAL, INCIDENTAL, OR PUNITIVE DAMAGES (INCLUDING
-FOR ANY LOSS OF GOODWILL, BUSINESS INTERRUPTION, LOST PROFITS OR DATA, OR
-COMPUTER FAILURE OR MALFUNCTION) ARISING FROM OR RELATING TO THE EXTERNAL
-DEPENDENCIES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, EVEN
-IF AMAZON HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE LIMITATIONS
-AND DISCLAIMERS APPLY EXCEPT TO THE EXTENT PROHIBITED BY APPLICABLE LAW.
-
-MariaDB Community License - [LICENSE](https://mariadb.com/kb/en/mariadb-licenses/)
-MySQL Community Edition - [LICENSE](https://github.com/mysql/mysql-server/blob/8.0/LICENSE)
+Original sample application licensed under MIT-0 by Amazon.com, Inc. See [LICENSE](./LICENSE).
+DevOps platform code in `devops/` is original work by the author.
