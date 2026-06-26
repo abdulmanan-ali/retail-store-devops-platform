@@ -10,6 +10,13 @@ services:
     tag: "d0585af8072e763ecff4329108e1c3d0bab03d24"
     port: 8080
     replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
     env:
       GIN_MODE: "release"
       RETAIL_CATALOG_PERSISTENCE_PROVIDER: "mysql"
@@ -20,6 +27,13 @@ services:
     tag: "d0585af8072e763ecff4329108e1c3d0bab03d24"
     port: 8080
     replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     env:
       RETAIL_CART_PERSISTENCE_PROVIDER: "dynamodb"
       RETAIL_CART_PERSISTENCE_DYNAMODB_ENDPOINT: "http://cart-db:8000"
@@ -32,6 +46,13 @@ services:
     tag: "d0585af8072e763ecff4329108e1c3d0bab03d24"
     port: 8080
     replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
     env:
       RETAIL_CHECKOUT_PERSISTENCE_PROVIDER: "redis"
       RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL: "redis://checkout-redis:6379"
@@ -42,6 +63,13 @@ services:
     tag: "d0585af8072e763ecff4329108e1c3d0bab03d24"
     port: 8080
     replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     env:
       RETAIL_ORDERS_PERSISTENCE_PROVIDER: "postgres"
       RETAIL_ORDERS_PERSISTENCE_ENDPOINT: "orders-db:5432"
@@ -56,6 +84,13 @@ services:
     tag: "d0585af8072e763ecff4329108e1c3d0bab03d24"
     port: 8080
     replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
     env:
       RETAIL_UI_ENDPOINTS_CATALOG: "http://catalog:8080"
       RETAIL_UI_ENDPOINTS_CARTS: "http://cart:8080"
