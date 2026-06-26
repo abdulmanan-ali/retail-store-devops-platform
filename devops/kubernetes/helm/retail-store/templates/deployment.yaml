@@ -21,6 +21,13 @@ spec:
         - name: {{ $name }}
           image: "{{ $service.image }}:{{ $service.tag }}"
           imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          resources:
+            requests:
+              cpu: {{ $service.resources.requests.cpu }}
+              memory: {{ $service.resources.requests.memory }}
+            limits:
+              cpu: {{ $service.resources.limits.cpu }}
+              memory: {{ $service.resources.limits.memory }}
           ports:
             - containerPort: {{ $service.port }}
           envFrom:
