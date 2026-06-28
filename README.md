@@ -37,31 +37,41 @@ The underlying sample app intentionally uses multiple languages and persistence 
 
 ---
 
-## Platform architecture
+## 🏗️ Platform Architecture
 
-```
-                         ┌─────────────────┐
-                         │   GitHub Repo    │  ← single source of truth
-                         └────────┬─────────┘
-                                  │
-                    ┌─────────────┴─────────────┐
-                    ▼                           ▼
-         ┌──────────────────┐         ┌──────────────────┐
-         │  GitHub Actions   │         │     ArgoCD        │
-         │  - Build (matrix) │         │  - Watches Git     │
-         │  - Trivy scan     │         │  - Auto-syncs      │
-         │  - Push to ECR    │         │    cluster state   │
-         │  - Update Helm    │         │  - selfHeal: true  │
-         └─────────┬─────────┘         └─────────┬──────────┘
-                   │                              │
-                   ▼                              ▼
-            ┌─────────────┐              ┌──────────────────┐
-            │   AWS ECR    │◄─────────────│   Kubernetes      │
-            │ (5 repos,    │   pulls      │   Cluster          │
-            │  SHA tags)   │              │  - 5 services       │
-            └─────────────┘              │  - 5 databases       │
-                                          │  - Prometheus/Grafana│
-                                          └──────────────────────┘
+```mermaid
+flowchart TB
+
+    GH["GitHub Repository<br/>Single Source of Truth"]
+
+    GA["GitHub Actions
+    • Matrix Build
+    • Trivy Scan
+    • Push to AWS ECR
+    • Update Helm Values"]
+
+    AR["ArgoCD
+    • Watch Git
+    • Auto Sync
+    • Self Heal"]
+
+    ECR["AWS ECR
+    • 5 Repositories
+    • SHA Image Tags"]
+
+    K8S["Kubernetes Cluster
+    • 5 Microservices
+    • 5 PostgreSQL Databases
+    • HPA & VPA
+    • Prometheus
+    • Grafana
+    • Loki"]
+
+    GH --> GA
+    GH --> AR
+    GA --> ECR
+    ECR --> K8S
+    AR --> K8S
 ```
 
 ---
@@ -79,21 +89,27 @@ The underlying sample app intentionally uses multiple languages and persistence 
 
 ---
 
-## Repository structure
+## 📁 Repository Structure
 
-```
+```text
 .
-├── src/                          # Microservice source code (Go, Java, Node.js)
 ├── devops/
-│   ├── docker/                   # Custom multi-stage Dockerfiles per service
-│   ├── terraform/                # VPC, ECR, remote state config
+│   ├── docker/                   # Multi-stage Dockerfiles for each microservice
+│   ├── terraform/                # AWS infrastructure (VPC, ECR, remote state)
 │   ├── kubernetes/
-│   │   ├── base/                 # Raw manifests, ServiceMonitors
-│   │   ├── helm/retail-store/    # Helm chart (templates + values.yaml)
-│   │   └── argocd/               # ArgoCD Application manifest
-│   └── scripts/                  # Load testing, automation scripts
-├── .github/workflows/            # CI pipeline (ci.yml)
-└── docker-compose.yaml           # Local multi-service stack (reference)
+│   │   ├── base/                 # Kubernetes manifests & ServiceMonitors
+│   │   ├── helm/
+│   │   │   └── retail-store/     # Helm chart (templates & values.yaml)
+│   │   └── argocd/               # ArgoCD Application manifests
+│   └── scripts/                  # Automation & load testing scripts
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml                # CI/CD pipeline
+│
+├── docker-compose.yaml           # Local development environment
+├── README.md
+└── LICENSE
 ```
 
 ---
