@@ -22,10 +22,9 @@ Built by [Abdul Manan Ali](https://github.com/abdulmanan-ali) — Lahore, Pakist
 | **Security** | 7 real CVEs identified and fixed via the CI pipeline (Thymeleaf SSTI, Tomcat auth bypass, Go TLS bypass, vulnerable npm dependency) |
 
 ---
+## Application architecture
 
 ![Architecture](/docs/images/architecture.png)
-
-## Application architecture
 
 The underlying sample app intentionally uses multiple languages and persistence backends to mirror a real polyglot microservices environment:
 
