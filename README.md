@@ -23,6 +23,8 @@ Built by [Abdul Manan Ali](https://github.com/abdulmanan-ali) — Lahore, Pakist
 
 ---
 
+![Architecture](/docs/images/architecture.png)
+
 ## Application architecture
 
 The underlying sample app intentionally uses multiple languages and persistence backends to mirror a real polyglot microservices environment:
@@ -37,7 +39,7 @@ The underlying sample app intentionally uses multiple languages and persistence 
 
 ---
 
-## 🏗️ Platform Architecture
+<!-- ## 🏗️ Platform Architecture
 
 ```mermaid
 flowchart TB
@@ -67,12 +69,12 @@ flowchart TB
     • Grafana
     • Loki"]
 
-    GH --> GA
-    GH --> AR
-    GA --> ECR
-    ECR --> K8S
-    AR --> K8S
-```
+    GH -> GA
+    GH -> AR
+    GA -> ECR
+    ECR -> K8S
+    AR -> K8S
+``` -->
 
 ---
 
