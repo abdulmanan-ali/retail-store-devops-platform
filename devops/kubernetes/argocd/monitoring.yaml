@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/abdulmanan-ali/retail-store-devops-platform.git
     targetRevision: main
-    path: devops/kubernetes/monitoring
+    path: devops/monitoring
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
