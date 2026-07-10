@@ -35,3 +35,13 @@ spec:
       name: ui
       jsonPointers:
         - /spec/replicas
+    - group: apps
+      kind: Deployment
+      name: catalog
+      jsonPointers:
+        - /spec/replicas
+    - group: apps
+      kind: Deployment
+      name: checkout
+      jsonPointers:
+        - /spec/replicas
