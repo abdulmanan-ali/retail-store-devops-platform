@@ -54,3 +54,4 @@ docker-compose.override.yml
 *secret-db.yaml
 notes.txt
 ecr-credentials-refresher.yaml
+alertmanager-template.yaml
