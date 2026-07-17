@@ -129,6 +129,7 @@ databases:
     env:
       POSTGRES_DB: "orders"
       POSTGRES_USER: "orders_user"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
 
   rabbitmq:
     image: rabbitmq
