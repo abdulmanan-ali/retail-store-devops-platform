@@ -3,27 +3,25 @@ module "eks" {
   version = "~> 21.0"
 
   name               = "${var.project_name}-eks"
-  kubernetes_version = "1.34"
+  kubernetes_version = "1.31"
 
   endpoint_public_access                   = true
   enable_cluster_creator_admin_permissions = true
 
-  addons = {
-    coredns = {}
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
-    eks-pod-identity-agent = {
+  addons = {
+    vpc-cni = {
       before_compute = true
     }
 
     kube-proxy = {}
-
-    vpc-cni = {
-      before_compute = true
-    }
+    coredns = {}
+    aws-ebs-csi-driver = {
+    most_recent = true
   }
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  }
 
   eks_managed_node_groups = {
     general = {
@@ -34,6 +32,10 @@ module "eks" {
       min_size     = 1
       max_size     = 3
       desired_size = 2
+
+      iam_role_additional_policies = {
+        ssm = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      }
     }
   }
 }
